@@ -10,7 +10,7 @@ _No?_ aw man that was my whole selling point :(
 
 either way this solves the problem for me of having to modify every shader to consider region rects, whilst also taking into account json loading, positioning, rotation and all that shiz
 
-**just download the entire project or Blit_Sprite.gd if you too want to make some wacky fnf stuff or whatever else you can find to do with Ts** 
+**just download the entire project or the blit sprite folder if you too want to make some wacky fnf stuff or whatever else you can find to do with Ts** 
 
 _**SIDE NOTE:**_ The json format needed is in technicaly a non-standard format for FNF, So using 
 
