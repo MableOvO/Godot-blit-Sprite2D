@@ -1,0 +1,29 @@
+[gd_scene load_steps=2 format=3 uid="uid://bckndg6giwp2k"]
+
+[sub_resource type="GDScript" id="GDScript_rxg2q"]
+script/source = "extends Node2D
+
+var texture = preload(\"res://Missing_tex.png\")
+func _ready():
+	var raw_image = texture.get_image()
+	var crop_pool = TextureCrop.new()
+	crop_pool.source_Image = raw_image
+	
+	crop_pool.add_texture_pool(Rect2(0,0,42,42))
+	crop_pool.add_texture_pool(Rect2(42,0,42,42))
+	crop_pool.add_texture_pool(Rect2(32,0,42,42))
+	crop_pool.add_texture_pool(Rect2(0,42,42,42))
+	crop_pool.add_texture_pool(Rect2(0,32,42,42))
+	
+	#var this_texture = crop_pool.get_texture_from_pool(this_image)
+	#$Sprite2D.set_texture(this_texture)
+"
+
+[node name="Main" type="Node2D"]
+script = SubResource("GDScript_rxg2q")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+centered = false
+region_rect = Rect2(0, 0, 48, 48)
+
+[node name="Camera2D" type="Camera2D" parent="."]

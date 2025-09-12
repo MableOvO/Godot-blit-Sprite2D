@@ -1,0 +1,24 @@
+ea4bc82a6ad023ab7ee23ee620429895
+::res://::1757659843
+3d perspective.gdshader::Shader::380087964314713341::1757659321::0::1::::<><><>0<>0<><>::
+blit_Sprite2D.svg::CompressedTexture2D::6915303553691616686::1757469600::1757659844::1::::<><><>0<>0<>4f09bfeae0190e8d7876b2f11301d4f2<>res://.godot/imported/blit_Sprite2D.svg-6018f8f8bce9083f7bc8a2ef5f624b04.ctex::
+Blit_Sprite.gd::GDScript::546269239779878777::1757658974::0::1::::Blit_Sprite2D<>Sprite2D<>res://blit_Sprite2D.svg<>0<>1<><>::
+dropshadow.gdshader::Shader::8206579017674388059::1757659321::0::1::::<><><>0<>0<><>::
+export_presets.cfg::TextFile::-1::1757658552::0::1::::<><><>0<>0<><>::
+fpsdraw.gd::GDScript::4637286470359412875::1755656206::0::1::::<>Node<><>0<>0<><>::
+gude-2025-09-09.log::TextFile::-1::1757467674::0::1::::<><><>0<>0<><>::
+icon.svg::CompressedTexture2D::2756149823316062538::1755652390::1757659844::1::::<><><>0<>0<>b8b20ea5f9418fcf198252c7e8e241a2<>res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex::
+Main.tscn::PackedScene::2548237190110666252::1757659320::0::1::::<><><>0<>0<><>::uid://sm8rlheqjbv2::::res://wiggle.gdshader<>uid://do6lfl8os7ppb::::res://dropshadow.gdshader<>uid://h1u8euovgug4::::res://Blit_Sprite.gd<>uid://c55xa2pp7qvgf::::res://Examples/BOYFRIEND.png
+Missing_tex.png::CompressedTexture2D::2057855204864370213::1736799547::1757659844::1::::<><><>0<>0<>ae14298da23a0b3618eacb0f97833153<>res://.godot/imported/Missing_tex.png-d7b0afd95b09178d391890b2551fa233.ctex::
+pico-pixel_offsets.json::JSON::-1::1757634833::0::1::::<><><>0<>0<><>::
+TextureCrop.gd::GDScript::8173210140813572092::1757282285::0::1::::<>Node<><>0<>0<><>::
+wiggle.gdshader::Shader::1290206326564937969::1757453311::0::1::::<><><>0<>0<><>::
+::res://Examples/::1757658586
+BOYFRIEND.json::JSON::-1::1757657126::0::1::::<><><>0<>0<><>::
+BOYFRIEND.png::CompressedTexture2D::6941835942010063173::1715743965::1757659851::1::::<><><>0<>0<>479e4ced582c77a482a62d0d0a675919<>res://.godot/imported/BOYFRIEND.png-2910d465767d2b70ff6e48bef67a3bbd.ctex::
+daddyDearest.json::JSON::-1::1748156302::0::1::::<><><>0<>0<><>::
+daddyDearest.png::CompressedTexture2D::7582264932939750947::1726196691::1757659845::1::::<><><>0<>0<>3d75634f076cfc67127c744523d97927<>res://.godot/imported/daddyDearest.png-2022037db49e0b5d4a33e16e26a635f2.ctex::
+picoPixel.json::JSON::-1::1757658169::0::1::::<><><>0<>0<><>::
+picoPixel.png::CompressedTexture2D::3732316617918644518::1757629799::1757659844::1::::<><><>0<>0<>37dc49e311eec92fc34a898237a3a411<>res://.godot/imported/picoPixel.png-efcb1296d166110f93917718ac8f5961.ctex::
+picoPixel.xml::TextFile::-1::1757630658::0::1::::<><><>0<>0<><>::
+picoPixel_mask.png::CompressedTexture2D::324662690593998069::1757629767::1757659844::1::::<><><>0<>0<>3d36511e086f842c8170907369d9e641<>res://.godot/imported/picoPixel_mask.png-8f93b45ef5ef02ee748cbc77615c2955.ctex::

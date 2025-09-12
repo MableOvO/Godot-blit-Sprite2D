@@ -1,0 +1,25 @@
+[gd_scene load_steps=2 format=3 uid="uid://bckndg6giwp2k"]
+
+[sub_resource type="GDScript" id="GDScript_rxg2q"]
+script/source = "extends Node2D
+
+
+func _ready():
+	var tex = BoolTexture.new()
+	var image = Image.new()
+	#NOTE: figure out a better way to get images
+	image.load(\"res://Missing_tex.png\") 
+	tex.push_stack(image,Rect2i(0,0,48,48))
+	
+	
+	#$Sprite2D.texture = tex.pull_stack_at(0)
+"
+
+[node name="Main" type="Node2D"]
+script = SubResource("GDScript_rxg2q")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+centered = false
+region_rect = Rect2(0, 0, 48, 48)
+
+[node name="Camera2D" type="Camera2D" parent="."]
