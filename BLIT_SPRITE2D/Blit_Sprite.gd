@@ -4,6 +4,13 @@ class_name Blit_Sprite2D
 extends Sprite2D
 
 
+signal animation_finished(anim_name:StringName)
+
+signal animation_list_changed()
+
+
+
+
 ##A texture pool for the sprite's frames, also contains some stuff for slicing them
 var crop_pool := TextureCrop.new()
 
@@ -77,6 +84,7 @@ var current_stack_idx = 0:
 var finished_parsing := false
 
 
+
 @export_category("Animation")
 
 
@@ -91,6 +99,23 @@ var _raw_offsets := {}
 var _offsets = []
 
 
+##The three styles of looping, all looping styles other than Once rely on loop_times to determinte the ammount of times looping
+enum loop_type {
+Once, ##The default style of looping, none at all
+Loop, ##Repeats the last played animation, 
+Next ##Loops through the available animations, one after the other
+}
+
+##defines the style of looping
+@export var loopStyle := loop_type.Once:
+	set(value):
+		loopStyle = value
+		
+		loop_times = -1 if value != loop_type.Once else 0
+	
+
+##Ammount of times the animation loops, -1 for indefinitely, 0 for none, anything else loops that ammount of times
+@export var loop_times = 0
 
 var icon = ""
 
@@ -185,18 +210,48 @@ func _process(delta: float) -> void:
 	
 	
 	animation_frame = clamp(animation_frame,-_anim_end,_anim_end)
-
-	#what
-	if animation_frame >= _anim_end ||  animation_frame <= -_anim_end :
+	if speed_scale == 0.0:
 		Playing = false
-		
+	if get_current_animation_position() > get_current_animation_length():
+		_Loop_handler()
 	
 	if not Playing: #not calculating allat
 		return
 	
 	time += delta
-	animation_frame = round(time * frame_rate * speed_scale)
+	animation_frame = int(floor(time * frame_rate * speed_scale))
 
+
+
+##Handles looping
+func _Loop_handler():
+	if Playing:
+		Playing = false
+		self.emit_signal("animation_finished",current_animation_name)
+		
+		
+		#if loop times is zero should the loop style be returned to Once?, chat any help ?
+		match loopStyle:
+			loop_type.Loop:
+				if loop_times == 0:
+					return
+				
+				if loop_times != -1:
+					loop_times -= 1
+				play(current_animation_name)
+
+			loop_type.Next:
+				if loop_times == 0:
+					return
+				if loop_times != -1:
+					loop_times -= 1
+				
+				var cur_idx = wrap(available.find(current_animation_name) + 1,0,available.size())
+				play(available[cur_idx])
+
+
+
+##Handles loading
 func _LOAD():
 	
 	crop_pool.clear_pool()
@@ -234,6 +289,7 @@ func _LOAD():
 				await _parse_frames()
 	
 	finished_parsing = true
+	self.emit_signal("animation_list_changed")
 	notify_property_list_changed()
 
 
@@ -316,9 +372,11 @@ func _parse_frames():
 
 ##Plays the animation with that key name
 func play(animation_name := "",custom_speed := 1.0):
+	if custom_speed == 1.0:custom_speed = speed_scale
 	current_animation_name = animation_name
 	speed_scale = custom_speed
 	Playing = true
+
 
 
 
@@ -327,6 +385,7 @@ func play_abstract(animation_name := "",custom_speed := 1.0,index_value = -1):
 	var this_animation = ""
 	var local_index = []
 	
+	if custom_speed == 1.0:custom_speed = speed_scale
 	
 	for anim in available:
 		if anim.containsn(animation_name):
@@ -339,12 +398,7 @@ func play_abstract(animation_name := "",custom_speed := 1.0,index_value = -1):
 		printerr("animation could not be found in player: %s" %animation_name)
 		return 
 	
-	current_animation_name = this_animation
-	speed_scale = custom_speed
-	Playing = true
-
-
-
+	play(this_animation,custom_speed)
 
 
 
@@ -410,11 +464,18 @@ func play_frame():
 
 #stuff that mimics the AnimationPlayer node's formatting
 
-##The length (in seconds) of the currently playing animation.
-func get_current_animation_length():
+##The length (in seconds) of the currently playing animation, absolute if negative
+func get_current_animation_length() -> float:
+	if not _animations.has(current_animation_name):
+		printerr("error getting animation length, animation isnt set or doesnt exist")
+		return 0.0
 	var frames = _animations[current_animation_name].size()
-	var _time =  (frames /frame_rate * speed_scale)
-	return round(_time)
+	return abs(frames / (frame_rate * speed_scale))
+
+##The position (in seconds) of the currently playing animation, absolute if negative
+func get_current_animation_position():
+	return abs(time)
+
 
 
 ##Sets the speed scaling ratio

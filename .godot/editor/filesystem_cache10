@@ -1,16 +1,17 @@
 ea4bc82a6ad023ab7ee23ee620429895
-::res://::1757663247
+::res://::1757737754
 export_presets.cfg::TextFile/TextFile::-1::1757660613::0::1::::<><><>0<>0<><>::
 fpsdraw.gd::GDScript/GDScript::4637286470359412875::1755656206::0::1::::<>Node<><>0<>0<><>::
-Main.tscn::PackedScene::4219954987989888258::1757663239::0::1::::<><><>0<>0<><>::uid://sm8rlheqjbv2::::res://Example Shaders/wiggle.gdshader<>uid://eynlchfqvum3::::res://BLIT_SPRITE2D/Blit_Sprite.gd
-::res://BLIT_SPRITE2D/::1757662992
-blit_Sprite2D.svg::CompressedTexture2D/CompressedTexture2D::799302467112602127::1757469600::1757662992::1::::<><><>0<>0<>5bdc569ce24d396bb2a376a0952b4db8<>res://.godot/imported/blit_Sprite2D.svg-28c0d77f7b2e74c662aa486d67f74169.ctex::
-Blit_Sprite.gd::GDScript/GDScript::331109521398220684::1757662876::0::1::::Blit_Sprite2D<>Sprite2D<>res://BLIT_SPRITE2D/blit_Sprite2D.svg<>0<>1<><>::
-::res://Example Shaders/::1757662958
+Main.tscn::PackedScene::4219954987989888258::1757736066::0::1::::<><><>0<>0<><>::uid://sm8rlheqjbv2::::res://Example Shaders/wiggle.gdshader<>uid://do6lfl8os7ppb::::res://Example Shaders/dropshadow.gdshader<>uid://eynlchfqvum3::::res://BLIT_SPRITE2D/Blit_Sprite.gd<>uid://1483grkqbt7s::::res://Examples/BOYFRIEND.png<>uid://21rse5p5pmly::::res://Examples/daddyDearest.png
+README.md::TextFile/TextFile::-1::1757663444::0::1::::<><><>0<>0<><>::
+::res://BLIT_SPRITE2D/::1757735980
+blit_Sprite2D.svg::CompressedTexture2D/CompressedTexture2D::799302467112602127::1757469600::1757663534::1::::<><><>0<>0<>5bdc569ce24d396bb2a376a0952b4db8<>res://.godot/imported/blit_Sprite2D.svg-28c0d77f7b2e74c662aa486d67f74169.ctex::
+Blit_Sprite.gd::GDScript::331109521398220684::1757735979::0::1::::Blit_Sprite2D<>Sprite2D<>res://BLIT_SPRITE2D/blit_Sprite2D.svg<>0<>1<><>::
+::res://Example Shaders/::1757736083
 3d perspective.gdshader::Shader/Shader::380087964314713341::1757659321::0::1::::<><><>0<>0<><>::
-dropshadow.gdshader::Shader/Shader::8206579017674388059::1757659321::0::1::::<><><>0<>0<><>::
+dropshadow.gdshader::Shader::8206579017674388059::1757736083::0::1::::<><><>0<>0<><>::
 wiggle.gdshader::Shader/Shader::1290206326564937969::1757453311::0::1::::<><><>0<>0<><>::
-::res://Examples/::1757662999
+::res://Examples/::1757710620
 BOYFRIEND.json::JSON/JSON::-1::1757657126::0::1::::<><><>0<>0<><>::
 BOYFRIEND.png::CompressedTexture2D/CompressedTexture2D::1886830894324779814::1715743965::1757662999::1::::<><><>0<>0<>2c6d4627f02148430f8e94378cb024b7<>res://.godot/imported/BOYFRIEND.png-2910d465767d2b70ff6e48bef67a3bbd.ctex::
 daddyDearest.json::JSON/JSON::-1::1748156302::0::1::::<><><>0<>0<><>::
