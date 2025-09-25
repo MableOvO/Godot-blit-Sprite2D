@@ -5,8 +5,9 @@ extends Sprite2D
 
 
 signal animation_finished(anim_name:StringName)
-
 signal animation_list_changed()
+
+
 
 
 
@@ -30,7 +31,9 @@ var crop_pool := TextureCrop.new()
 ##Sets both the x and y scale at the same time, ignore if freeballin it by using scale
 @export var size := 1.0:
 	set(value):
-		size = value 
+		size = value
+		if scale.x != scale.y:
+			return
 		scale = Vector2(value,value)
 
 
@@ -45,7 +48,6 @@ var crop_pool := TextureCrop.new()
 ##Whether or not json capabilities are enabled, needed for the animation tab to work
 @export var use_json := false:
 	set(value):
-		
 		use_json = value
 		reparse = true
 
@@ -98,6 +100,8 @@ var _raw_offsets := {}
 
 var _offsets = []
 
+var extraVariables = {}
+
 
 ##The three styles of looping, all looping styles other than Once rely on loop_times to determinte the ammount of times looping
 enum loop_type {
@@ -118,7 +122,8 @@ Next ##Loops through the available animations, one after the other
 @export var loop_times = 0
 
 var icon = ""
-
+var bopTime = 2
+var bopStyle = "default" ##note make this an enum later, for better hinting
 
 ##The point that the sprite position's itself around
 @export_enum("Feet","Top left","Center") var pivot_point: int = 0:
@@ -174,11 +179,16 @@ var frame_rate = 25
 
 var _anim_end := 0:
 	get():
-		return _animations[current_animation_name].size() - 1
+		if use_json:
+			if not _animations.is_empty():
+				return _animations[current_animation_name].size() - 1
+			else:
+				return 0
+		else:
+			return 0
 
 
 func _process(delta: float) -> void:
-	
 	if flip_v:
 		printerr("native flip_v doesnt work for blit sprites, use the one under Blit Sprite2D")
 		flip_v = false
@@ -196,15 +206,14 @@ func _process(delta: float) -> void:
 		reparse = false
 		finished_parsing = false
 		_LOAD()
-	
-	if not finished_parsing:
+		
+	if not finished_parsing or not use_json:
 		return
 	
 	if image == null or json_path == "":
 		return
 	
-	if not use_json:
-		return
+
 	
 	
 	
@@ -247,50 +256,71 @@ func _Loop_handler():
 					loop_times -= 1
 				
 				var cur_idx = wrap(available.find(current_animation_name) + 1,0,available.size())
-				play(available[cur_idx])
-
+				if not available.is_empty():
+					play(available[cur_idx])
 
 
 ##Handles loading
 func _LOAD():
-	
+	texture = image
 	crop_pool.clear_pool()
 	_offsets.clear()
-	texture = image
 	
 	
 	var base_tex = null
 	if use_json:
+		
+		var json_exists = ResourceLoader.exists(json_path)
+		
+		#if the json doesn't exist in the pck it might be in a user specified folder, so handle ts
+		if not json_exists: 
+			print("Resource loader doesn't exist for the Json, falling back to a FileAccess check")
+			json_exists = FileAccess.file_exists(json_path)
+			
+		
+		
+		
 		base_tex = texture.get_image()
-		texture = null
-	
-		if ResourceLoader.exists(json_path) and use_json:
+		if json_exists:
 			#READ data
+			
+			
 			var datafile = FileAccess.open(json_path, FileAccess.READ)
 			var parsedResult = JSON.parse_string(datafile.get_as_text())
 			datafile.close()
-			
 			if parsedResult != null:
-
 				
-				_animations = parsedResult.get("SPRITE", {})
-				
-				_raw_offsets = parsedResult.get("OFFSETS", {})
 				var ETC = parsedResult.get("ETC", {})
+				_animations = parsedResult.get("SPRITE", {})
+				_raw_offsets = parsedResult.get("OFFSETS", {})
+				if _raw_offsets.is_empty():
+					apply_offsets = false
+				extraVariables["INDICES"] = parsedResult.get("INDICES",{})
+				
 				size = ETC.get("SCALE",size)
 				icon = ETC.get("ICON_NAME","")
+				
 				var is_pixel = ETC.get("IS_PIXEL",false)
 				texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST  if is_pixel else CanvasItem.TEXTURE_FILTER_LINEAR
+				
 				
 				available = _animations.keys()
 				current_animation_name = available.front()
 				crop_pool.source_Image = base_tex
 				base_tex = null
 				await _parse_frames()
+		else:
+			printerr("Json path \"%s\" doesn't exist" % json_path )
+			use_json = false
+	else:
+		apply_offsets = false
+		apply_pivot(Vector2.ZERO)
+		
 	
 	finished_parsing = true
 	self.emit_signal("animation_list_changed")
 	notify_property_list_changed()
+
 
 
 
@@ -359,13 +389,30 @@ func _parse_frames():
 						_animations[anim][i] = pool_idx
 						
 		#replace the source key frame with the location of the parsed frame
-
+	
+	
+	#if indices exists slice a new animation based on that
+	if not extraVariables["INDICES"].is_empty():
+		for indice_name in extraVariables["INDICES"]:
+			var indice = extraVariables["INDICES"][indice_name]
+			var base_animation = indice[0]
+			var slice = indice[1]
+			if _animations.has(base_animation):
+				var this_anim = _animations[base_animation]
+				_animations[indice_name] = this_anim.slice(slice[0],slice[1])
+				_offsets[indice_name] = _offsets[base_animation]
+		extraVariables.erase("INDICES") #dont need that anymore
+		available = _animations.keys() #refresh this, with our new animations
+	
+	
+	
+	
+	
 	crop_pool.source_Image = null 
 	
 	if crop_pool.STACK.size() > 0:
-		play_abstract("idle") #if such animation even exists in this sprite
-
-
+		if play_abstract("idle") == false:#if such animation even exists in this sprite
+			play(available.back())
 
 
 
@@ -381,7 +428,7 @@ func play(animation_name := "",custom_speed := 1.0):
 
 
 ##Plays the animation with a vague search and an index_value, if one is not applied the front of the available matching animations is used
-func play_abstract(animation_name := "",custom_speed := 1.0,index_value = -1):
+func play_abstract(animation_name := "",custom_speed := 1.0,index_value = -1) -> bool:
 	var this_animation = ""
 	var local_index = []
 	
@@ -392,14 +439,17 @@ func play_abstract(animation_name := "",custom_speed := 1.0,index_value = -1):
 			local_index.append(anim)
 	local_index.sort()
 	
+	if local_index.is_empty():
+		return false
+	
 	this_animation = local_index.front() if index_value == -1 else local_index[clamp(index_value,0,local_index.size() - 1)]
 	
 	if this_animation == "":
 		printerr("animation could not be found in player: %s" %animation_name)
-		return 
+		return false
 	
 	play(this_animation,custom_speed)
-
+	return true
 
 
 ##apply the sprite's offsets set from it's JSON.      NOTE: It can only use feet pivot points
@@ -414,7 +464,7 @@ var _last_frame = 0
 func play_frame():
 	if current_animation_name == "": return
 	if not available.has(current_animation_name):
-		printerr("animation does not exist, falling back to the start of animation index :/")
+		printerr("%s does not exist, falling back to the start of animation index :/" % current_animation_name)
 		current_animation_name = available.front()
 		return
 	
@@ -431,20 +481,18 @@ func play_frame():
 		#.. or if you are mae, fix it you little fucker")
 		current_animation_name = ""
 		return
-
-
-
-
-
-
-	
 	_last_frame = this_frame
 	current_stack_idx = this_frame
 	
 	var offs_end = _offsets[current_animation_name].size() - 1
 	var extra_data = _offsets[current_animation_name][clamp(animation_frame,-offs_end,offs_end)] if not _offsets[current_animation_name].is_empty() else Vector2.ZERO
 	
-	
+	apply_pivot(extra_data)
+
+
+func apply_pivot(extra_data):
+	if texture == null: return
+
 	var local_pivot = Vector2.ZERO
 	var texture_size =  texture.get_size() 
 	match pivot_point:
@@ -457,8 +505,7 @@ func play_frame():
 	if apply_offsets and pivot_point != 0:
 		printerr("NOTE: applying offsets can only be used when the pivot is set to Feet")
 		apply_offsets = false
-
-
+	
 	offset = local_pivot + (extra_data if apply_offsets else  Vector2.ZERO)
 
 
@@ -467,7 +514,8 @@ func play_frame():
 ##The length (in seconds) of the currently playing animation, absolute if negative
 func get_current_animation_length() -> float:
 	if not _animations.has(current_animation_name):
-		printerr("error getting animation length, animation isnt set or doesnt exist")
+		printerr("error getting animation length in \"%s\", animation isnt set or doesnt exist" % self.name)
+		use_json = false
 		return 0.0
 	var frames = _animations[current_animation_name].size()
 	return abs(frames / (frame_rate * speed_scale))
@@ -484,7 +532,8 @@ func set_speed_scale(value):
 
 
 
-
+func _exit_tree() -> void:
+	crop_pool = null #just in case, the sprite being deleted DOESNT nullify this
 
 class BLIT_RES:
 	#i dont like dealing with the xml format, and i was already using jsons soooo
@@ -501,7 +550,12 @@ class BLIT_RES:
 			
 			parser.open(XML_path)
 			while parser.read() != ERR_FILE_EOF:
-				var node_name = parser.get_node_name()
+				var node_name = ""
+				if parser.get_node_type() == XMLParser.NodeType.NODE_TEXT:
+					continue
+				
+				node_name = parser.get_node_name()
+					
 				if node_name != "SubTexture":
 					continue
 				
@@ -553,34 +607,64 @@ class BLIT_RES:
 		
 		var data = JSON.parse_string(Offsets.get_as_text())
 		
+
+		
 		if data == null:
 			push_error("error getting offsets from JSON, file contains invalid data")
 			return
 		
 		Offsets.close()
 		
-		var ICO = data.get("healthIcon",{"id":null}).get("id",null)
-		var size = data.get("scale",1)
-		var is_pixel = data.get("isPixel",false)
-		var OFFSETS = {}
-		var extra_data = {
-			"ICON_NAME":ICO,
-			"SCALE":size,
-			"IS_PIXEL":is_pixel
-		}
-		for anim in data.get("animations",[]):
-			if not OFFSETS.has(anim):
-				OFFSETS[anim.name] = []
-			OFFSETS[anim.name].append(anim.offsets)
+		var data_MAIN = JSON.parse_string(Main.get_as_text())
 		
-		data = JSON.parse_string(Main.get_as_text())
-		if data == null:
+		if data_MAIN == null:
 			push_error("error getting animation data from the main JSON, file contains invalid data")
 			return
 		
-		data["OFFSETS"] = OFFSETS
-		data["ETC"] = extra_data
-		Main.store_string(JSON.stringify(data," ",false))
+		var ICO = data.get("healthIcon",{"id":null}).get("id",null)
+		var size = data.get("scale",1)
+		var is_pixel = data.get("isPixel",false)
+		
+		
+		
+		var OFFSETS = {}
+		var INDICES = {}
+		
+		var extra_data = {
+			"ICON_NAME":ICO,
+			"IS_PIXEL":is_pixel
+		}
+		if size != 1:
+			extra_data["SCALE"] = size
+		for anim in data.get("animations",[]):
+			if not OFFSETS.has(anim):
+				OFFSETS[anim.name] = []
+			
+			OFFSETS[anim.name].append(anim.offsets)
+
+			#
+
+			#if not data_MAIN.get("SPRITE",{}).has(anim.name):
+			if anim.has("frameIndices"):
+				
+				if anim.frameIndices.size() > 1 and anim.frameIndices[0] > anim.frameIndices[1]:
+					anim.frameIndices.remove_at(0)
+				
+				var _min = anim.frameIndices.front()
+				var _max = anim.frameIndices.back()
+				
+				var local_name = anim.name.replacen("dance","idle")
+				#most of the time its pretty linear for indices, at least for base game
+				INDICES[local_name] = [anim.prefix,[_min,_max]]
+#		
+
+		
+		data_MAIN["OFFSETS"] = OFFSETS
+		data_MAIN["INDICES"] = INDICES
+		data_MAIN["ETC"] = extra_data
+		
+		Main.store_string(JSON.stringify(data_MAIN," ",false))
+		Main.close()
 
 
 
